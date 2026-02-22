@@ -1428,9 +1428,10 @@ func (u *UserInterface) update() (float64, float64, error) {
 		if err := hook.SuspendAudio(); err != nil {
 			return 0, 0, err
 		}
-		// Wait for an arbitrary period to avoid busy loop.
-		time.Sleep(time.Second / 60)
-		if err := glfw.PollEvents(); err != nil {
+		// Wait for events or timeout to avoid busy loop.
+		// WaitEventsTimeout is more precise than time.Sleep and also
+		// wakes immediately when the window regains focus.
+		if err := glfw.WaitEventsTimeout(1.0 / 60.0); err != nil {
 			return 0, 0, err
 		}
 	}
