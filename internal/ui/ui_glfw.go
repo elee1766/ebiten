@@ -1519,9 +1519,8 @@ func (u *UserInterface) updateGame() error {
 		d := t2.Sub(t1)
 		const wait = time.Second / 60
 		if d < wait {
-			remaining := (wait - d).Seconds()
 			u.mainThread.Call(func() {
-				if err := glfw.WaitEventsTimeout(remaining); err != nil {
+				if err := glfw.WaitEventsTimeout((wait - d).Seconds()); err != nil {
 					u.setError(err)
 				}
 			})
