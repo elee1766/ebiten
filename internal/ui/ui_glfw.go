@@ -1513,12 +1513,18 @@ func (u *UserInterface) updateGame() error {
 	}
 
 	// When a window is not focused or in another space, SwapBuffers might return immediately and CPU might be busy.
-	// Mitigate this by sleeping (#982, #2521).
+	// Mitigate this by waiting for events with a timeout (#982, #2521).
+	// WaitEventsTimeout is more precise than time.Sleep and also processes events during the wait.
 	if unfocused {
 		d := t2.Sub(t1)
 		const wait = time.Second / 60
 		if d < wait {
-			time.Sleep(wait - d)
+			remaining := (wait - d).Seconds()
+			u.mainThread.Call(func() {
+				if err := glfw.WaitEventsTimeout(remaining); err != nil {
+					u.setError(err)
+				}
+			})
 		}
 	}
 
